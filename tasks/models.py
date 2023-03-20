@@ -1,3 +1,9 @@
+from django.contrib.auth.models import User
 from django.db import models
 
-# Create your models here.
+
+class Tasks(models.Model):
+    desc = models.CharField(max_length=100)
+    estimateAt = models.DateField()
+    doneAt = models.DateField(blank=True, null=True)
+    userId = models.ForeignKey(User, on_delete=models.CASCADE)
