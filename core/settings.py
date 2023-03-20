@@ -34,7 +34,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'tasks.apps.TasksConfig',
-    'login.apps.LoginConfig'
+    'login.apps.LoginConfig',
+    'accounts.apps.AccountsConfig',
 ]
 
 MIDDLEWARE = [

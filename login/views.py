@@ -6,7 +6,6 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import CustomTokenObtainPairSerializer, UserLoginSerializer
@@ -39,7 +38,7 @@ class UserLoginView(views.APIView):
         }, status=status.HTTP_200_OK)
 
 
-class Token(APIView):
+class TokenSerializer(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, format=None):
