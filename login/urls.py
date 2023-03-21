@@ -4,6 +4,6 @@ from . import views
 
 urlpatterns = [
     path('login/', views.Login, name='login'),
-    path('login/token/', views.TokenSerializer.as_view(), name='auth_token'),
-    path('login/api/', views.UserLoginView.as_view(), name='login_api'),
+    path('login/sigin/', views.Sigin.as_view(), name='sigin'),
+    path('logout/', views.LogoutView.as_view(), name='token_blacklist'),
 ]
