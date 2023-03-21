@@ -1,25 +1,23 @@
+from django.contrib.auth.models import User
 from django.shortcuts import render
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework.views import APIView
-
-from .serializers import CustomUserSerializer
 
 
 def Accounts(request):
     return render(request, 'accounts/accounts.html')
 
 
-class CreateUserView(APIView):
-    """
-    Cria um novo usuário.
-    """
-    serializer_class = CustomUserSerializer
-
-    def post(self, request, format=None):
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['POST'])
+def criar_usuario(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    email = request.data.get('email')
+    if not username or not password or not email:
+        return Response({'erro': 'Informe o nome de usuário, senha e email'}, status=status.HTTP_400_BAD_REQUEST)
+    if User.objects.filter(username=username).exists():
+        return Response({'erro': 'Nome de usuário já está em uso'}, status=status.HTTP_400_BAD_REQUEST)
+    user = User.objects.create_user(
+        username=username, password=password, email=email)
+    return Response({'mensagem': 'Usuário criado com sucesso'}, status=status.HTTP_201_CREATED)
