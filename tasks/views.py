@@ -1,7 +1,8 @@
 from datetime import date
 
 from django.shortcuts import render
-from rest_framework import authentication, permissions
+from rest_framework import generics, permissions, status
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -12,8 +13,7 @@ def home(request):
     return render(request, 'tasks/home.html')
 
 
-class TasksView(APIView):
-    # authentication_classes = [authentication.TokenAuthentication]
+class GetTasksView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, format=None):
@@ -45,3 +45,56 @@ class TasksView(APIView):
 
         # Retorna a lista de tarefas em formato JSON
         return Response(tasks_list)
+
+
+class CreateTaskView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        # Obtenha o usuário autenticado a partir do token
+        user = request.user
+
+        # Verifique se o campo 'desc' está presente nos dados da solicitação POST
+        if 'desc' not in request.data:
+            return Response({'error': 'Field "desc" is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Crie a nova tarefa
+        task = Tasks(desc=request.data['desc'], estimateAt=request.data.get(
+            'estimateAt'), userId=user)
+        task.save()
+
+        # Crie um dicionário com os campos da nova tarefa
+        task_dict = {
+            'id': task.id,
+            'desc': task.desc,
+            'estimateAt': task.estimateAt,
+            'doneAt': task.doneAt,
+            'userId': task.userId.id,
+        }
+
+        # Retorne a resposta com o status 201 (Created) e o dicionário da nova tarefa
+        return Response(task_dict, status=status.HTTP_201_CREATED)
+
+
+class DeleteTaskView(generics.DestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        try:
+            # Obter a task com o ID passado via parâmetro na URL
+            return Tasks.objects.get(id=self.kwargs['task_id'])
+        except Tasks.DoesNotExist:
+            raise NotFound
+
+    def delete(self, request, *args, **kwargs):
+        # Obter a task a ser deletada
+        task = self.get_object()
+
+        # Verificar se o usuário que está autenticado é o dono da task
+        if task.userId != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        # Deletar a task
+        task.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
