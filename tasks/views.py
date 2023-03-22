@@ -2,8 +2,7 @@ from datetime import date
 
 from django.shortcuts import render
 from rest_framework import generics, permissions, status
-from rest_framework.exceptions import (NotFound, PermissionDenied,
-                                       ValidationError)
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -55,9 +54,11 @@ class CreateTaskView(APIView):
         # Obtenha o usuário autenticado a partir do token
         user = request.user
 
-        # Verifique se o campo 'desc' está presente nos dados da solicitação POST
+        # Verifique se o campo 'desc' está
+        # presente nos dados da solicitação POST
         if 'desc' not in request.data:
-            return Response({'error': 'Field "desc" is required.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Field "desc" is required.'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         # Crie a nova tarefa
         task = Tasks(desc=request.data['desc'], estimateAt=request.data.get(
@@ -73,7 +74,8 @@ class CreateTaskView(APIView):
             'userId': task.userId.id,
         }
 
-        # Retorne a resposta com o status 201 (Created) e o dicionário da nova tarefa
+        # Retorne a resposta com o status 201 (Created)
+        # e o dicionário da nova tarefa
         return Response(task_dict, status=status.HTTP_201_CREATED)
 
 
