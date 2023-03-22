@@ -131,5 +131,3 @@ class ToggleTaskView(generics.UpdateAPIView):
             instance.save()
             return Response({'success': 'Task não concluida.'},
                             status=status.HTTP_200_OK)
-
-        return self.partial_update(request, *args, **kwargs)
