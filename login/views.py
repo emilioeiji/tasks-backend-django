@@ -33,12 +33,21 @@ class Sigin(APIView):
         user = authenticate(username=username, password=password)
 
         if user is None:
-            return Response({'error': 'Invalid Credentials'})
+            return Response({'error': 'Invalid Credentials'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
+        user_id = user.id
+        user_name = user.username
 
-        return Response({'token': access_token})
+        response_data = {
+            'token': access_token,
+            'id': user_id,
+            'username': user_name
+        }
+
+        return Response(response_data)
 
 
 class ProtectedView(APIView):
