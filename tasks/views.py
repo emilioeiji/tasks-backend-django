@@ -2,7 +2,8 @@ from datetime import date
 
 from django.shortcuts import render
 from rest_framework import generics, permissions, status
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import (NotFound, PermissionDenied,
+                                       ValidationError)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -98,3 +99,37 @@ class DeleteTaskView(generics.DestroyAPIView):
         task.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ToggleTaskView(generics.UpdateAPIView):
+    queryset = Tasks.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        try:
+            # Obter a task com o ID passado via parâmetro na URL
+            return self.queryset.get(id=self.kwargs['task_id'])
+        except Tasks.DoesNotExist:
+            raise NotFound
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Verificar se o usuário que está autenticado é o dono da task
+        if instance.userId != self.request.user:
+            raise PermissionDenied
+
+        # Verificar se o campo doneAt já foi preenchido
+        if instance.doneAt is None:
+            instance.doneAt = date.today()
+            instance.save()
+            return Response({'success': 'Task concluida.'},
+                            status=status.HTTP_200_OK)
+
+        else:
+            instance.doneAt = None
+            instance.save()
+            return Response({'success': 'Task não concluida.'},
+                            status=status.HTTP_200_OK)
+
+        return self.partial_update(request, *args, **kwargs)
