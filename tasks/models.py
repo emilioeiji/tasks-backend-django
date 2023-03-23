@@ -7,3 +7,6 @@ class Tasks(models.Model):
     estimateAt = models.DateField()
     doneAt = models.DateField(blank=True, null=True)
     userId = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.desc)
