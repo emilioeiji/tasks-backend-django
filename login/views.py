@@ -40,11 +40,13 @@ class Signin(APIView):
         access_token = str(refresh.access_token)
         user_id = user.id
         user_name = user.username
+        user_email = user.email
 
         response_data = {
             'token': access_token,
             'id': user_id,
-            'username': user_name
+            'username': user_name,
+            'email': user_email
         }
 
         return Response(response_data)
